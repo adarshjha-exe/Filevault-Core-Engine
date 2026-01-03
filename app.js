@@ -1,19 +1,20 @@
-import { readdir } from 'node:fs/promises';
+import { readdir, open } from 'node:fs/promises';
 import http from 'node:http';
 
 //server
 const server = http.createServer(async (req, res) => {
-  // get all files/folder from the directory
-  const filesAndFolderItems = await readdir('./storage', { recursive: true });
+  if (req.url === '/') {
+    // get all files/folder from the directory
+    const filesAndFolderItems = await readdir('./storage', { recursive: true });
 
-  //dynamic HTML
-  let dynamicHTML = '';
-  filesAndFolderItems.forEach((file) => {
-    dynamicHTML += `<li>${file} </li>`;
-  });
+    //dynamic HTML
+    let dynamicHTML = '';
+    filesAndFolderItems.forEach((file) => {
+      dynamicHTML += `<li>${file} </li>`;
+    });
 
-  // server response
-  res.end(`<!DOCTYPE html>
+    // server response
+    res.end(`<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,8 +26,18 @@ const server = http.createServer(async (req, res) => {
     <ul> ${dynamicHTML} </ul>
   </body>
 </html>`);
+  } else {
+    try {
+      const fileHandle = await open(`./storage${req.url}`);
+      const readStream = fileHandle.createReadStream();
+      readStream.pipe(res);
+    } catch (error) {
+      console.log(error.message);
+      res.end('File Not found');
+    }
+  }
 });
 
 server.listen(3000, '0.0.0.0', () => {
-  console.log('Server is up & running on port 4000');
+  console.log('Server is up & running on port 3000');
 });
