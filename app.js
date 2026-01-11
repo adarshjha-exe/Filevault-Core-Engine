@@ -23,8 +23,14 @@ const server = http.createServer(async (req, res) => {
   } else {
     try {
       const fileHandle = await open(`./storage${decodeURIComponent(req.url)}`);
-      const readStream = fileHandle.createReadStream();
-      readStream.pipe(res);
+      // check if url is directory or file
+      const stats = await fileHandle.stat();
+      if (stats.isDirectory()) {
+        res.end('This is directory please select file');
+      } else {
+        const readStream = fileHandle.createReadStream();
+        readStream.pipe(res);
+      }
     } catch (error) {
       console.log(error.message);
       res.end('File Not found');
