@@ -26,7 +26,24 @@ const server = http.createServer(async (req, res) => {
       // check if url is directory or file
       const stats = await fileHandle.stat();
       if (stats.isDirectory()) {
-        res.end('This is directory please select file');
+        const filesAndFolderItems = await readdir(
+          `./storage${decodeURIComponent(req.url)}`,
+          {
+            recursive: true,
+          }
+        );
+        //dynamic HTML
+        let dynamicHTML = '';
+        filesAndFolderItems.forEach((file) => {
+          dynamicHTML += `<a href="./${req.url}/${file}">${file} </a> </br>`;
+        });
+
+        //Read HTML file
+        let htmlFile = await fs.readFile('./Homepage.html', 'utf-8');
+
+        // server response
+        htmlFile = htmlFile.replace('${dynamicHTML}', dynamicHTML);
+        res.end(htmlFile);
       } else {
         const readStream = fileHandle.createReadStream();
         readStream.pipe(res);
