@@ -5,45 +5,14 @@ import fs from 'node:fs/promises';
 //server
 const server = http.createServer(async (req, res) => {
   if (req.url === '/') {
-    // get all files/folder from the directory
-    const filesAndFolderItems = await readdir('./storage', { recursive: true });
-
-    //dynamic HTML
-    let dynamicHTML = '';
-    filesAndFolderItems.forEach((file) => {
-      dynamicHTML += `<a href="./${file}">${file} </a> </br>`;
-    });
-
-    //Read HTML file
-    let htmlFile = await fs.readFile('./Homepage.html', 'utf-8');
-
-    // server response
-    htmlFile = htmlFile.replace('${dynamicHTML}', dynamicHTML);
-    res.end(htmlFile);
+    serveDirectory(req, res);
   } else {
     try {
       const fileHandle = await open(`./storage${decodeURIComponent(req.url)}`);
       // check if url is directory or file
       const stats = await fileHandle.stat();
       if (stats.isDirectory()) {
-        const filesAndFolderItems = await readdir(
-          `./storage${decodeURIComponent(req.url)}`,
-          {
-            recursive: true,
-          }
-        );
-        //dynamic HTML
-        let dynamicHTML = '';
-        filesAndFolderItems.forEach((file) => {
-          dynamicHTML += `<a href="./${req.url}/${file}">${file} </a> </br>`;
-        });
-
-        //Read HTML file
-        let htmlFile = await fs.readFile('./Homepage.html', 'utf-8');
-
-        // server response
-        htmlFile = htmlFile.replace('${dynamicHTML}', dynamicHTML);
-        res.end(htmlFile);
+        serveDirectory(req, res);
       } else {
         const readStream = fileHandle.createReadStream();
         readStream.pipe(res);
@@ -54,6 +23,28 @@ const server = http.createServer(async (req, res) => {
     }
   }
 });
+
+async function serveDirectory(req, res) {
+  const filesAndFolderItems = await readdir(
+    `./storage${decodeURIComponent(req.url)}`,
+    {
+      recursive: true,
+    }
+  );
+  //dynamic HTML
+  let dynamicHTML = '';
+  filesAndFolderItems.forEach((file) => {
+    const baseUrl = req.url.endsWith('/') ? req.url : req.url + '/';
+    dynamicHTML += `<a href="${baseUrl}${file}">${file} </a> </br>`;
+  });
+
+  //Read HTML file
+  let htmlFile = await fs.readFile('./Homepage.html', 'utf-8');
+
+  // server response
+  htmlFile = htmlFile.replace('${dynamicHTML}', dynamicHTML);
+  res.end(htmlFile);
+}
 
 server.listen(3000, '0.0.0.0', () => {
   console.log('Server is up & running on port 3000');
