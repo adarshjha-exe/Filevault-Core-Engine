@@ -35,7 +35,7 @@ async function serveDirectory(req, res) {
   let dynamicHTML = '';
   filesAndFolderItems.forEach((file) => {
     const baseUrl = req.url.endsWith('/') ? req.url : req.url + '/';
-    dynamicHTML += `<a href="${baseUrl}${file}">${file} </a> </br>`;
+    dynamicHTML += `${file} <a href="${baseUrl}${file}"> Download </a> <a href="${baseUrl}${file}">  Preview</a></br>`;
   });
 
   //Read HTML file
