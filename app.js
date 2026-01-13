@@ -7,8 +7,17 @@ const server = http.createServer(async (req, res) => {
   if (req.url === '/') {
     serveDirectory(req, res);
   } else {
+    let [url, queryString] = req.url.split('?');
+    let queryParam = {};
+    if (queryString) {
+      queryString.split('&')?.forEach((pair) => {
+        const [key, value] = pair.split('=');
+        queryParam[key] = value;
+      });
+    }
+    console.log(queryParam);
     try {
-      const fileHandle = await open(`./storage${decodeURIComponent(req.url)}`);
+      const fileHandle = await open(`./storage${decodeURIComponent(url)}`);
       // check if url is directory or file
       const stats = await fileHandle.stat();
       if (stats.isDirectory()) {
@@ -35,7 +44,7 @@ async function serveDirectory(req, res) {
   let dynamicHTML = '';
   filesAndFolderItems.forEach((file) => {
     const baseUrl = req.url.endsWith('/') ? req.url : req.url + '/';
-    dynamicHTML += `${file} <a href="${baseUrl}${file}"> Download </a> <a href="${baseUrl}${file}">  Preview</a></br>`;
+    dynamicHTML += `${file} <a href="${baseUrl}${file}?action=download"> Download </a> <a href="${baseUrl}${file}?action=preview">  Preview</a></br>`;
   });
 
   //Read HTML file
