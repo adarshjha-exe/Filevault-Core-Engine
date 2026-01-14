@@ -3,3 +3,4 @@
 *.mp4
 *.txt
 *.ico
+node_modules/
