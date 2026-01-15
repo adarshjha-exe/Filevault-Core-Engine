@@ -10,7 +10,6 @@ const server = http.createServer(async (req, res) => {
   } else {
     try {
       let [url, queryString] = req.url.split('?');
-      console.log(url);
       let queryParam = {};
       if (queryString) {
         queryString.split('&')?.forEach((pair) => {
@@ -54,26 +53,11 @@ const server = http.createServer(async (req, res) => {
 
 async function serveDirectory(req, res) {
   let [url] = req.url.split('?');
-  console.log(url);
   const filesAndFolderItems = await readdir(`./storage${url}`);
-  //dynamic HTML
-  let dynamicHTML = '';
-  filesAndFolderItems.forEach((file) => {
-    dynamicHTML += `${file} <a href=".${
-      url === '/' ? '' : url
-    }/${file}?action=preview">Preview</a>  &nbsp; <a href=".${
-      url === '/' ? '' : url
-    }/${file}?action=download">Download</a></br>`;
-  });
-
-  //Read HTML file
-  let htmlFile = await fs.readFile('./Homepage.html', 'utf-8');
-
-  // server response
-  htmlFile = htmlFile.replace('${dynamicHTML}', dynamicHTML);
-  res.end(htmlFile);
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(filesAndFolderItems));
 }
 
 server.listen(4000, '0.0.0.0', () => {
-  console.log('Server is up & running on port 3000');
+  console.log('Server is up & running on port 4000');
 });
