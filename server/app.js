@@ -74,6 +74,6 @@ async function serveDirectory(req, res) {
   res.end(htmlFile);
 }
 
-server.listen(3000, '0.0.0.0', () => {
+server.listen(4000, '0.0.0.0', () => {
   console.log('Server is up & running on port 3000');
 });
