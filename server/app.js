@@ -5,6 +5,9 @@ import mime from 'mime-types';
 
 //server
 const server = http.createServer(async (req, res) => {
+  // handle CORS err
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   if (req.url === '/') {
     serveDirectory(req, res);
   } else {
@@ -39,7 +42,7 @@ const server = http.createServer(async (req, res) => {
         if (queryParam.action === 'download') {
           res.setHeader(
             'Content-Disposition',
-            `attachment; filename="${url.slice(1)}"`
+            `attachment; filename="${url.slice(1)}"`,
           );
         }
         readStream.pipe(res);
